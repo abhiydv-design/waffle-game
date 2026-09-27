@@ -1,0 +1,2 @@
+import {PiSpeakerHighFill,PiSpeakerSlashFill} from 'react-icons/pi';
+export function TopBar({sound,onSound,onReset}:{sound:boolean;onSound:()=>void;onReset:()=>void}){return <><div className="reset-control top-controls"><button onClick={onReset}>Reset Recipe</button></div><button className={`sound-icon-control ${sound?'active':''}`} onClick={onSound} aria-label={sound?'Turn sound off':'Turn sound on'} title={sound?'Sound on':'Sound off'}>{sound?<PiSpeakerHighFill/>:<PiSpeakerSlashFill/>}</button></>}
