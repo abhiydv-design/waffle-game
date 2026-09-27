@@ -2,9 +2,21 @@
 
 A web-based waffle-making game controlled by hand gestures, voice commands, mouse, or touch.
 
+## How to play
+
+Each round a customer places an order. Complete four stages to serve it:
+
+1. **Ingredients:** add all 7 ingredients to the bowl (tap or drag, pinch and gesture, or say the name).
+2. **Mixing:** stir in circles with your index finger, or drag circles inside the bowl.
+3. **Cooking:** pour the batter, close the lid, and open it while the needle is in the golden zone. Open too early and it's pale; too late and it burns.
+4. **Toppings:** add exactly what's on the order ticket, then serve.
+
+You're scored out of 3 stars based on how well the waffle is cooked, how many batches you burnt, and wrong toppings. Your best score is saved in the browser.
+
 ## Features
 
-- Illustrated ingredient-selection and batter-mixing stages
+- Seven customer orders, each matching a finished-waffle illustration
+- Illustrated ingredient, mixing, cooking and topping stages
 - MediaPipe hand and index-finger gesture tracking
 - Multilingual ingredient voice recognition
 - Mouse and touch fallback controls

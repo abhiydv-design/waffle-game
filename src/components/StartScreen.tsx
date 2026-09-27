@@ -1,2 +1,27 @@
-import type {GamePhase} from '../game/types';
-export function StartScreen({phase,onNext,onSkip}:{phase:GamePhase;onNext:()=>void;onSkip:()=>void}){if(!['loading','ready','camera-setup','microphone-setup'].includes(phase))return null;const content=phase==='loading'?['Preparing your kitchen…','Warming the waffle maker.','']:phase==='ready'?['Ready to Cook?','Choose ingredients with your voice, hand, mouse, or touch.','Start Cooking']:phase==='camera-setup'?['Camera Tracking','Use your hand to point and pinch ingredients.','Enable Camera']:['Voice Control','Say ingredient names naturally while you cook.','Enable Microphone'];return <div className="start-layer"><section className="start-card"><p>Waffle Kitchen</p><h1>{content[0]}</h1><span>{content[1]}</span>{content[2]&&<button onClick={onNext}>{content[2]}</button>}{phase!=='loading'&&phase!=='ready'&&<button className="text-button" onClick={onSkip}>Not now</button>}</section></div>}
+import { TOPPINGS, type WaffleOrder } from '../game/serving';
+
+export function StartScreen({ order, loading, onStart }: { order: WaffleOrder; loading: boolean; onStart: () => void }) {
+  const toppings = order.toppings.map(id => TOPPINGS.find(t => t.id === id)!.name);
+  return (
+    <div className="start-layer">
+      <section className="start-card intro-card">
+        <p>Waffle Kitchen</p>
+        <h1>{loading ? 'Warming up the kitchen…' : 'New order!'}</h1>
+        <div className="intro-order">
+          <b>{order.customer} wants a {order.name}</b>
+          <span>{toppings.join(', ').replace(/, ([^,]*)$/, ' and $1')}</span>
+        </div>
+        <ol className="intro-steps">
+          <li>Add all 7 ingredients to the bowl</li>
+          <li>Stir the batter smooth</li>
+          <li>Cook it golden, not burnt</li>
+          <li>Add the toppings and serve</li>
+        </ol>
+        <button className="start-button" disabled={loading} onClick={onStart}>
+          {loading ? 'Loading…' : 'Start cooking'}
+        </button>
+        <small>Play with your mouse, touch, hand gestures or voice.</small>
+      </section>
+    </div>
+  );
+}
