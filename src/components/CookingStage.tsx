@@ -2,22 +2,18 @@ import { DONENESS_LABEL, HEAT_ZONES, donenessFor, type Doneness } from '../game/
 
 export type CookStep = 'open' | 'pouring' | 'poured' | 'closing' | 'cooking' | 'opened';
 
-const MAKER_ART: Record<Exclude<CookStep, 'opened'>, string> = {
-  open: '/assets/waffle/maker-open.png',
-  pouring: '/assets/waffle/maker-pour.png',
-  poured: '/assets/waffle/maker-pour.png',
-  closing: '/assets/waffle/maker-closed.png',
-  cooking: '/assets/waffle/maker-working.png',
+const TD = '/assets/waffle/topdown/';
+const OPEN_ART = `${TD}maker-open.png`;
+const CLOSED_ART = `${TD}maker-closed.png`;
+const BATTER_ART = `${TD}batter.png`;
+const WAFFLE_ART: Record<Doneness, string> = {
+  raw: `${TD}waffle-raw.png`,
+  half: `${TD}waffle-half.png`,
+  perfect: `${TD}waffle-perfect.png`,
+  burnt: `${TD}waffle-burnt.png`,
 };
 
-const RESULT_ART: Record<Doneness, string> = {
-  raw: '/assets/waffle/waffle-half.png',
-  half: '/assets/waffle/waffle-half.png',
-  perfect: '/assets/waffle/waffle-perfect.png',
-  burnt: '/assets/waffle/waffle-burnt.png',
-};
-
-export const COOKING_ART = [...Object.values(MAKER_ART), ...Object.values(RESULT_ART)];
+export const COOKING_ART = [OPEN_ART, CLOSED_ART, BATTER_ART, ...Object.values(WAFFLE_ART)];
 
 type Props = {
   step: CookStep;
@@ -31,7 +27,9 @@ type Props = {
 
 export function CookingStage({ step, heat, onPour, onClose, onOpen, onServe, onRetry }: Props) {
   const doneness = donenessFor(heat);
-  const art = step === 'opened' ? RESULT_ART[doneness] : MAKER_ART[step];
+  const closed = step === 'closing' || step === 'cooking';
+  const cooked = step === 'opened';
+  const batter = step === 'pouring' || step === 'poured';
   const inWindow = step === 'cooking' && doneness === 'perfect';
   const smoking = step === 'cooking' && doneness === 'burnt';
 
@@ -108,7 +106,15 @@ export function CookingStage({ step, heat, onPour, onClose, onOpen, onServe, onR
           data-hand-press={primary ? '' : undefined}
           aria-label={heading}
         >
-          <img key={art} src={art} alt="" />
+          {/* Open base and closed lid share one canvas, so swapping them looks like the lid swinging. */}
+          <img className={`maker-layer maker-open ${closed ? 'hidden' : ''}`} src={OPEN_ART} alt="" />
+          {batter && <img className={`plate-layer batter ${step === 'pouring' ? 'pouring' : ''}`} src={BATTER_ART} alt="" />}
+          {cooked && <img key={doneness} className="plate-layer cooked" src={WAFFLE_ART[doneness]} alt="" />}
+          {step === 'pouring' && <span className="batter-stream" aria-hidden="true" />}
+          <img className={`maker-layer maker-closed ${closed ? '' : 'hidden'}`} src={CLOSED_ART} alt="" />
+          {closed && <span className="maker-light power on" aria-hidden="true" />}
+          {closed && <span className={`maker-light ready ${inWindow ? 'on' : ''}`} aria-hidden="true" />}
+          {step === 'cooking' && !smoking && <span className="steam" aria-hidden="true"><i /><i /><i /></span>}
           {smoking && <span className="smoke" aria-hidden="true"><i /><i /><i /></span>}
         </button>
       </section>

@@ -1,13 +1,6 @@
 import { PiCheckBold } from 'react-icons/pi';
 import { TOPPINGS, type Doneness, type ToppingId, type WaffleOrder } from '../game/serving';
 
-const WAFFLE_COLORS: Record<Doneness, { base: string; pocket: string; rim: string }> = {
-  raw: { base: '#f4dca6', pocket: '#e6c483', rim: '#d9b36e' },
-  half: { base: '#ecc27a', pocket: '#d9a555', rim: '#c98f43' },
-  perfect: { base: '#dd9a45', pocket: '#bb7226', rim: '#a55f1c' },
-  burnt: { base: '#6b3f22', pocket: '#4a2915', rim: '#3a1f10' },
-};
-
 /** Where each sprite topping sits on the plated waffle (percent of the plate box). */
 const SPRITE_SPOTS: Partial<Record<ToppingId, { left: number; top: number; size: number }>> = {
   strawberry: { left: 30, top: 50, size: 40 },
@@ -25,27 +18,6 @@ export function ChocolateIcon() {
       <rect x="22" y="26" width="20" height="18" rx="3" fill="#f3d9a8" />
       <path d="M26 35c3-4 9-4 12 0" stroke="#5a2c17" strokeWidth="3" fill="none" strokeLinecap="round" />
       <path d="M40 14c4 4 4 9 1 12" stroke="#8a4a26" strokeWidth="2" fill="none" />
-    </svg>
-  );
-}
-
-function PlatedWaffle({ doneness }: { doneness: Doneness }) {
-  const c = WAFFLE_COLORS[doneness];
-  return (
-    <svg className="plated-waffle" viewBox="0 0 200 200" aria-hidden="true">
-      <defs>
-        <pattern id="waffle-grid" width="16" height="16" patternUnits="userSpaceOnUse" x="4" y="4">
-          <rect width="16" height="16" fill={c.base} />
-          <rect x="3" y="3" width="10" height="10" rx="2" fill={c.pocket} />
-        </pattern>
-        <clipPath id="waffle-clip"><circle cx="100" cy="100" r="80" /></clipPath>
-      </defs>
-      <circle cx="100" cy="104" r="82" fill="rgba(60,25,8,.25)" />
-      <circle cx="100" cy="100" r="82" fill={c.rim} />
-      <g clipPath="url(#waffle-clip)">
-        <rect width="200" height="200" fill="url(#waffle-grid)" />
-        <path d="M100 18v164M18 100h164" stroke={c.rim} strokeWidth="4" />
-      </g>
     </svg>
   );
 }
@@ -104,7 +76,7 @@ export function ToppingStage({ order, doneness, added, onAdd, onServe }: Props) 
       <section className="plate-stage" aria-label="Waffle on a plate">
         <img className="plate-art" src="/assets/waffle/plate.png" alt="" />
         <div className="plate-waffle">
-          <PlatedWaffle doneness={doneness} />
+          <img className="plated-waffle-art" src={`/assets/waffle/topdown/waffle-${doneness}.png`} alt="" />
           {added.map((id, index) => {
             const topping = TOPPINGS.find(t => t.id === id)!;
             if (topping.drizzle) return <Drizzle key={id} color={topping.drizzle} variant={id === 'chocolate' ? 1 : 0} />;
