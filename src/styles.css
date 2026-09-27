@@ -370,3 +370,33 @@
 .topping-phase .plate-waffle{width:54%;height:50%;top:46%}
 .plated-waffle-art{transform:none}
 .topping-phase .drizzle{transform:none}
+
+/* ---------- Daily special, streaks and sharing ---------- */
+.intro-top,.result-top{display:flex;align-items:center;justify-content:center;gap:10px}
+.intro-top p,.result-top p{margin:0}
+.streak-pill{display:inline-flex;align-items:center;gap:3px;padding:3px 10px 3px 8px;border-radius:20px;background:#ffe7c2;border:2px solid #f0b060;color:#9a4a1c;font-weight:900;font-size:12px;white-space:nowrap}
+.intro-order.done{border-style:solid;background:#edf1d8;border-color:#a9c77f}
+.intro-stars{font-size:22px!important;color:#f2a41a!important;letter-spacing:2px;font-weight:900}
+.intro-stars i{font-style:normal;color:#e0cfae}
+.next-special{margin:0 0 14px;font-size:12px;font-weight:800;color:#95633f}
+.next-special b{font-variant-numeric:tabular-nums;color:#7c3d20}
+.text-button{display:block;margin:10px auto 0;padding:4px 8px;border:0;background:none;color:#9d4f25;font-weight:900;font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.text-button:hover{color:#c86b2f}
+.result-actions{display:flex;gap:10px;justify-content:center}
+.result-actions button{flex:1}
+.completion-card .share-button{background:#5e9d3b;box-shadow:0 5px 0 #3b6824}
+.completion-card .share-button:hover{background:#6db446}
+.completion-card .share-button:disabled{opacity:.7;cursor:wait}
+.completion-card button.quiet{background:#fff3d9;color:#8a4a26;border-color:#e3a153;box-shadow:0 5px 0 #d49a57;font-size:16px}
+.completion-card button.quiet:hover{background:#ffeccb}
+.share-status{min-height:16px;margin:8px 0 2px;font-size:11px;font-weight:800;color:#56733e}
+.completion-card .next-special{margin:4px 0 0}
+@media(max-height:520px) and (orientation:landscape){
+  .completion-card img{display:none}
+  .result-actions button{padding:9px 12px;font-size:15px}
+  .intro-card .text-button{margin-top:6px}
+  .intro-card small{display:none}
+}
+.start-card .next-special{text-transform:none;letter-spacing:0;font-size:13px;color:#95633f;margin:12px 0 14px}
+.result-actions button{white-space:nowrap;font-size:16px;padding:11px 14px}
+.completion-card{width:min(450px,94vw)}

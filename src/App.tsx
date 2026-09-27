@@ -15,12 +15,14 @@ import {
   type Doneness, type ToppingId, type WaffleOrder,
 } from './game/serving';
 import type { GameFeedback } from './game/types';
+import { currentStreak, dailyNumber, dailyOrder, formatCountdown, loadStats, msUntilTomorrow, recordDaily, todaysEntry, type Stats } from './game/daily';
 import { useGameAudio, type GameSound } from './hooks/useGameAudio';
 import { useHandTracking, type HandAction } from './hooks/useHandTracking';
 import { useSpeechRecognition } from './hooks/useSpeechRecognition';
 
 type Phase = 'batter' | 'cooking' | 'toppings' | 'served';
-type Result = { stars: number; notes: string[]; seconds: number };
+type Result = { stars: number; notes: string[]; seconds: number; daily: number | null; streak: number };
+type Mode = 'daily' | 'practice';
 
 const BEST_KEY = 'waffle-morning-best';
 const readBest = () => { try { const v = Number(localStorage.getItem(BEST_KEY)); return v > 0 ? v : null; } catch { return null; } };
@@ -34,7 +36,10 @@ const BACKGROUNDS = {
 
 export default function App() {
   // ---------- Round state ----------
-  const [order, setOrder] = useState<WaffleOrder>(() => randomOrder());
+  const [mode, setMode] = useState<Mode>('daily');
+  const [order, setOrder] = useState<WaffleOrder>(() => dailyOrder());
+  const [stats, setStats] = useState<Stats>(loadStats);
+  const [now, setNow] = useState(() => Date.now());
   const [phase, setPhase] = useState<Phase>('batter');
   const [started, setStarted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -74,7 +79,8 @@ export default function App() {
   const orderRef = useRef(order); orderRef.current = order;
   const toppingsRef = useRef(toppings); toppingsRef.current = toppings;
 
-  const { enabled: soundEnabled, toggle: toggleSound, play } = useGameAudio();
+  const { enabled: soundEnabled, toggle: toggleSound, play, startLoop, stopLoop, setBurning } = useGameAudio();
+  const modeRef = useRef(mode); modeRef.current = mode;
 
   const later = useCallback((fn: () => void, ms: number) => { timers.current.push(window.setTimeout(fn, ms)); }, []);
 
@@ -142,14 +148,15 @@ export default function App() {
   const closeLid = useCallback(() => {
     const step = stepRef.current, done = donenessFor(heatRef.current);
     if (!(step === 'poured' || (step === 'opened' && (done === 'raw' || done === 'half')))) return;
-    setCookStep('closing'); play('add');
-    later(() => { setCookStep('cooking'); play('sizzle'); showFeedback('Watch the needle. Open it when it hits gold', 'info'); }, 700);
+    setCookStep('closing'); play('lid');
+    later(() => { setCookStep('cooking'); showFeedback('Watch the needle. Open it when it hits gold', 'info'); }, 700);
   }, [later, play, showFeedback]);
 
   const openLid = useCallback(() => {
     if (stepRef.current !== 'cooking') return;
     const done = donenessFor(heatRef.current);
     setCookStep('opened');
+    play('lid');
     if (done === 'perfect') { play('complete'); showFeedback('Perfect golden waffle!', 'success'); }
     else if (done === 'burnt') { play('burn'); showFeedback('Oh no, it burnt. Try a new batch', 'warning'); }
     else { play('duplicate'); showFeedback(`${DONENESS_LABEL[done]}. Close the lid to cook more`, 'warning'); }
@@ -175,6 +182,13 @@ export default function App() {
     const interval = window.setInterval(() => setHeat(h => Math.min(100, h + HEAT_PER_SECOND / 10)), 100);
     return () => window.clearInterval(interval);
   }, [cookStep]);
+
+  // Frying sound for as long as the lid is closed; it crackles harder once burning.
+  useEffect(() => {
+    if (cookStep === 'cooking' && soundEnabled) startLoop();
+    else stopLoop();
+  }, [cookStep, soundEnabled, startLoop, stopLoop]);
+  useEffect(() => { setBurning(cookStep === 'cooking' && donenessFor(heat) === 'burnt'); }, [cookStep, heat, setBurning]);
 
   const lastZone = useRef<Doneness>('raw');
   useEffect(() => {
@@ -212,7 +226,14 @@ export default function App() {
     if (!current.toppings.every(t => toppingsRef.current.includes(t))) { play('error'); showFeedback('Add every topping on the ticket first', 'warning'); return; }
     const seconds = Math.round((Date.now() - startedAt.current) / 1000);
     const score = scoreRound({ doneness: servedDoneness, retries, mistakes, seconds });
-    setResult({ ...score, seconds });
+    let daily: number | null = null, streak = 0;
+    if (modeRef.current === 'daily') {
+      const updated = recordDaily({ stars: score.stars, seconds, orderId: current.id });
+      setStats(updated);
+      daily = dailyNumber();
+      streak = currentStreak(updated);
+    }
+    setResult({ ...score, seconds, daily, streak });
     setPhase('served');
     play('complete');
     later(() => { setShowResult(true); play('star'); }, 1300);
@@ -296,16 +317,39 @@ export default function App() {
 
   useEffect(() => () => { window.clearTimeout(feedbackTimer.current); timers.current.forEach(window.clearTimeout); }, []);
 
-  const reset = () => {
+  const resetRound = (nextOrder: WaffleOrder) => {
     timers.current.forEach(window.clearTimeout); timers.current = [];
-    setOrder(previous => randomOrder(previous.id));
+    stopLoop();
+    setOrder(nextOrder);
     setPhase('batter'); setAdded(new Set()); setSelected(null); setMixProgress(0);
     setCookStep('open'); setHeat(0); setRetries(0); setServedDoneness('perfect');
     setToppings([]); toppingsRef.current = []; setMistakes(0); setResult(null); setShowResult(false);
     setFeedback(null); startedAt.current = Date.now();
   };
 
-  const start = () => { setStarted(true); startedAt.current = Date.now(); play('click'); };
+  const startMode = (next: Mode) => {
+    setMode(next);
+    resetRound(next === 'daily' ? dailyOrder() : randomOrder(orderRef.current.id));
+    setStarted(true);
+    play('click');
+  };
+
+  // "New order" goes back to the intro so players can pick the daily special or practice.
+  const backToMenu = () => {
+    resetRound(dailyOrder());
+    setStats(loadStats());
+    setStarted(false);
+  };
+
+  // Countdown to the next daily special, ticking only while it's on screen.
+  const countdownVisible = !started || showResult;
+  useEffect(() => {
+    if (!countdownVisible) return;
+    setNow(Date.now());
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [countdownVisible]);
+  const countdown = formatCountdown(msUntilTomorrow(new Date(now)));
 
   const toggleMic = () => {
     if (speech.status === 'listening') speech.stop();
@@ -348,7 +392,7 @@ export default function App() {
     <main className={`game-shell batter-only ${stage === 'mixing' ? 'mixing-phase' : ''} ${stage === 'cooking' ? 'maker-phase' : ''} ${stage === 'toppings' ? 'topping-phase' : ''} ${stage === 'served' ? 'served-phase' : ''}`}>
       <img key={background} className="kitchen-background scene-background" src={background} alt="" />
       <div className="game-vignette" />
-      <TopBar sound={soundEnabled} onSound={toggleSound} onReset={reset} />
+      <TopBar sound={soundEnabled} onSound={toggleSound} onReset={backToMenu} />
 
       {stage === 'ingredients' && <RecipePanel added={added} selected={selected} onChoose={choose} />}
 
@@ -389,11 +433,18 @@ export default function App() {
         </div>
       )}
 
-      {showResult && result && <CompletionModal order={order} stars={result.stars} notes={result.notes} seconds={result.seconds} best={best} onRestart={reset} />}
+      {showResult && result && (
+        <CompletionModal order={order} stars={result.stars} notes={result.notes} seconds={result.seconds} best={best}
+          daily={result.daily} streak={result.streak} countdown={countdown} onPractice={() => startMode('practice')} />
+      )}
 
       <div className="rotate-hint" aria-hidden="true"><span>↻</span><b>Turn your phone sideways</b><small>The kitchen needs a wide screen.</small></div>
 
-      {!started && <StartScreen order={order} loading={loading} onStart={start} />}
+      {!started && (
+        <StartScreen order={dailyOrder(new Date(now))} dailyNo={dailyNumber(new Date(now))} today={todaysEntry(stats, new Date(now))}
+          streak={currentStreak(stats, new Date(now))} countdown={countdown} loading={loading}
+          onDaily={() => startMode('daily')} onPractice={() => startMode('practice')} />
+      )}
     </main>
   );
 }
