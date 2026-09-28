@@ -15,6 +15,7 @@ import {
   type Doneness, type ToppingId, type WaffleOrder,
 } from './game/serving';
 import type { GameFeedback } from './game/types';
+import { trackEvent } from './game/analytics';
 import { currentStreak, dailyNumber, dailyOrder, formatCountdown, loadStats, msUntilTomorrow, recordDaily, todaysEntry, type Stats } from './game/daily';
 import { useGameAudio, type GameSound } from './hooks/useGameAudio';
 import { useHandTracking, type HandAction } from './hooks/useHandTracking';
@@ -112,7 +113,7 @@ export default function App() {
     setAdded(current => {
       const next = new Set(current);
       next.add(id);
-      if (next.size === BATTER_TOTAL) later(() => { play('complete'); showFeedback('All in! Now stir the batter in circles', 'success'); }, 600);
+      if (next.size === BATTER_TOTAL) later(() => { trackEvent('stage_reached', { stage: 'mixing' }); play('complete'); showFeedback('All in! Now stir the batter in circles', 'success'); }, 600);
       return next;
     });
     selectedRef.current = null;
@@ -134,7 +135,7 @@ export default function App() {
   // Smooth batter → waffle maker.
   useEffect(() => {
     if (mixProgress !== 100 || phase !== 'batter') return;
-    const timer = window.setTimeout(() => { setPhase('cooking'); setCookStep('open'); play('click'); }, 1500);
+    const timer = window.setTimeout(() => { setPhase('cooking'); setCookStep('open'); play('click'); trackEvent('stage_reached', { stage: 'cooking' }); }, 1500);
     return () => window.clearTimeout(timer);
   }, [mixProgress, phase, play]);
 
@@ -158,7 +159,7 @@ export default function App() {
     setCookStep('opened');
     play('lid');
     if (done === 'perfect') { play('complete'); showFeedback('Perfect golden waffle!', 'success'); }
-    else if (done === 'burnt') { play('burn'); showFeedback('Oh no, it burnt. Try a new batch', 'warning'); }
+    else if (done === 'burnt') { trackEvent('waffle_burnt'); play('burn'); showFeedback('Oh no, it burnt. Try a new batch', 'warning'); }
     else { play('duplicate'); showFeedback(`${DONENESS_LABEL[done]}. Close the lid to cook more`, 'warning'); }
   }, [play, showFeedback]);
 
@@ -166,6 +167,7 @@ export default function App() {
     if (stepRef.current !== 'opened') return;
     setServedDoneness(donenessFor(heatRef.current));
     setPhase('toppings');
+    trackEvent('stage_reached', { stage: 'toppings', doneness: donenessFor(heatRef.current) });
     play('click');
     showFeedback(`Now add ${orderRef.current.customer}’s toppings`, 'info');
   }, [play, showFeedback]);
@@ -234,6 +236,7 @@ export default function App() {
       streak = currentStreak(updated);
     }
     setResult({ ...score, seconds, daily, streak });
+    trackEvent('round_served', { mode: modeRef.current, order: current.id, stars: score.stars, seconds, doneness: servedDoneness, retries, mistakes, streak });
     setPhase('served');
     play('complete');
     later(() => { setShowResult(true); play('star'); }, 1300);
@@ -328,6 +331,7 @@ export default function App() {
   };
 
   const startMode = (next: Mode) => {
+    trackEvent('round_start', { mode: next });
     setMode(next);
     resetRound(next === 'daily' ? dailyOrder() : randomOrder(orderRef.current.id));
     setStarted(true);
@@ -353,7 +357,7 @@ export default function App() {
 
   const toggleMic = () => {
     if (speech.status === 'listening') speech.stop();
-    else { setVoiceEnabled(true); speech.start(); play('mic'); }
+    else { setVoiceEnabled(true); speech.start(); play('mic'); trackEvent('mic_enabled'); }
   };
 
   // ---------- Stage-specific coaching ----------
@@ -392,7 +396,7 @@ export default function App() {
     <main className={`game-shell batter-only ${stage === 'mixing' ? 'mixing-phase' : ''} ${stage === 'cooking' ? 'maker-phase' : ''} ${stage === 'toppings' ? 'topping-phase' : ''} ${stage === 'served' ? 'served-phase' : ''}`}>
       <img key={background} className="kitchen-background scene-background" src={background} alt="" />
       <div className="game-vignette" />
-      <TopBar sound={soundEnabled} onSound={toggleSound} onReset={backToMenu} />
+      <TopBar sound={soundEnabled} onSound={() => { trackEvent('sound_toggled', { on: !soundEnabled }); toggleSound(); }} onReset={backToMenu} />
 
       {stage === 'ingredients' && <RecipePanel added={added} selected={selected} onChoose={choose} />}
 
@@ -418,7 +422,7 @@ export default function App() {
 
       {playing && (
         <>
-          <CameraPanel videoRef={videoRef} status={tracking.status} gesture={tracking.gesture} hint={cameraHint} onEnable={() => { play('click'); tracking.start(); }} onContinue={() => showFeedback('Mouse and touch controls are ready', 'info')} />
+          <CameraPanel videoRef={videoRef} status={tracking.status} gesture={tracking.gesture} hint={cameraHint} onEnable={() => { play('click'); trackEvent('camera_enabled'); tracking.start(); }} onContinue={() => showFeedback('Mouse and touch controls are ready', 'info')} />
           <GestureGuide selected={selected} ready={mixing} detected={tracking.gesture} {...guide} />
           <VoiceBubble enabled={voiceEnabled} listening={speech.status === 'listening' || speech.status === 'requesting'} transcript={speech.transcript} message={speech.errorMessage || 'Voice control ready'} hint={voiceHint} onToggle={toggleMic} />
         </>

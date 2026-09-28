@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatTime, shareResult, type ShareOutcome } from '../game/shareCard';
+import { trackEvent } from '../game/analytics';
 import type { WaffleOrder } from '../game/serving';
 
 type Props = {
@@ -27,7 +28,9 @@ export function CompletionModal({ order, stars, notes, seconds, best, daily, str
   const headline = stars === 3 ? 'Chef’s kiss!' : stars === 2 ? 'Tasty work!' : 'Served, at least';
   const share = async () => {
     setStatus('working');
-    setStatus(await shareResult({ order, stars, seconds, daily, streak }));
+    const outcome = await shareResult({ order, stars, seconds, daily, streak });
+    setStatus(outcome);
+    trackEvent('share', { outcome, mode: daily ? 'daily' : 'practice', stars });
   };
   return (
     <div className="modal-backdrop">
