@@ -438,8 +438,6 @@ export default function App() {
           daily={result.daily} streak={result.streak} countdown={countdown} onPractice={() => startMode('practice')} />
       )}
 
-      <div className="rotate-hint" aria-hidden="true"><span>↻</span><b>Turn your phone sideways</b><small>The kitchen needs a wide screen.</small></div>
-
       {!started && (
         <StartScreen order={dailyOrder(new Date(now))} dailyNo={dailyNumber(new Date(now))} today={todaysEntry(stats, new Date(now))}
           streak={currentStreak(stats, new Date(now))} countdown={countdown} loading={loading}
