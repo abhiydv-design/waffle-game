@@ -26,6 +26,9 @@ type Result = { stars: number; notes: string[]; seconds: number; daily: number |
 type Mode = 'daily' | 'practice';
 
 const BEST_KEY = 'waffle-morning-best';
+const CONTROLS_KEY = 'waffle-morning-controls';
+type Controls = { camera: boolean; mic: boolean };
+const readControls = (): Controls => { try { return { camera: true, mic: true, ...JSON.parse(localStorage.getItem(CONTROLS_KEY) || '{}') }; } catch { return { camera: true, mic: true }; } };
 const readBest = () => { try { const v = Number(localStorage.getItem(BEST_KEY)); return v > 0 ? v : null; } catch { return null; } };
 const saveBest = (stars: number) => { try { localStorage.setItem(BEST_KEY, String(stars)); } catch { /* storage unavailable */ } };
 
@@ -43,6 +46,8 @@ export default function App() {
   const [now, setNow] = useState(() => Date.now());
   const [phase, setPhase] = useState<Phase>('batter');
   const [started, setStarted] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [controls, setControls] = useState<Controls>(readControls);
   const [loading, setLoading] = useState(true);
   const startedAt = useRef(Date.now());
 
@@ -338,6 +343,41 @@ export default function App() {
     play('click');
   };
 
+  const toggleControl = (key: keyof Controls) => setControls(current => {
+    const next = { ...current, [key]: !current[key] };
+    try { localStorage.setItem(CONTROLS_KEY, JSON.stringify(next)); } catch { /* storage unavailable */ }
+    play('click');
+    return next;
+  });
+
+  /**
+   * Asks for camera and microphone together (one browser prompt), then starts the round.
+   * If the player says no, the round still starts with mouse controls.
+   */
+  const launch = async (next: Mode) => {
+    const wantCamera = controls.camera && tracking.status !== 'tracking' && tracking.status !== 'loading';
+    const wantMic = controls.mic && speech.supported && speech.status !== 'listening';
+    let allowed = true;
+    if ((wantCamera || wantMic) && navigator.mediaDevices?.getUserMedia) {
+      setStarting(true);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: wantCamera, audio: wantMic });
+        stream.getTracks().forEach(track => track.stop());
+      } catch {
+        allowed = false;
+      }
+      setStarting(false);
+    }
+    startMode(next);
+    if (!allowed) {
+      trackEvent('permissions_denied', { camera: wantCamera, mic: wantMic });
+      later(() => showFeedback('Camera or mic was blocked. Mouse controls are ready', 'warning'), 300);
+      return;
+    }
+    if (wantCamera) { trackEvent('camera_enabled', { from: 'start' }); tracking.start(); }
+    if (wantMic) { trackEvent('mic_enabled', { from: 'start' }); setVoiceEnabled(true); speech.start(); }
+  };
+
   // "New order" goes back to the intro so players can pick the daily special or practice.
   const backToMenu = () => {
     resetRound(dailyOrder());
@@ -445,7 +485,8 @@ export default function App() {
       {!started && (
         <StartScreen order={dailyOrder(new Date(now))} dailyNo={dailyNumber(new Date(now))} today={todaysEntry(stats, new Date(now))}
           streak={currentStreak(stats, new Date(now))} countdown={countdown} loading={loading}
-          onDaily={() => startMode('daily')} onPractice={() => startMode('practice')} />
+          starting={starting} controls={controls} voiceSupported={speech.supported} onToggle={toggleControl}
+          onDaily={() => launch('daily')} onPractice={() => launch('practice')} />
       )}
     </main>
   );

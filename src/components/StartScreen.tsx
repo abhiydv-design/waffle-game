@@ -1,3 +1,4 @@
+import { PiCameraFill, PiMicrophoneFill, PiCheckBold } from 'react-icons/pi';
 import type { DailyEntry } from '../game/daily';
 import { formatTime } from '../game/shareCard';
 import { TOPPINGS, type WaffleOrder } from '../game/serving';
@@ -9,13 +10,37 @@ type Props = {
   streak: number;
   countdown: string;
   loading: boolean;
+  starting: boolean;
+  controls: { camera: boolean; mic: boolean };
+  voiceSupported: boolean;
+  onToggle: (key: 'camera' | 'mic') => void;
   onDaily: () => void;
   onPractice: () => void;
 };
 
+function Controls({ controls, voiceSupported, onToggle }: Pick<Props, 'controls' | 'voiceSupported' | 'onToggle'>) {
+  return (
+    <div className="intro-controls">
+      <span className="intro-controls-title">Play with</span>
+      <div className="intro-toggles">
+        <button className={`control-toggle ${controls.camera ? 'on' : ''}`} onClick={() => onToggle('camera')} aria-pressed={controls.camera}>
+          <PiCameraFill /><span><b>Hand gestures</b><small>Camera</small></span><i>{controls.camera && <PiCheckBold />}</i>
+        </button>
+        <button className={`control-toggle ${controls.mic && voiceSupported ? 'on' : ''}`} onClick={() => onToggle('mic')} aria-pressed={controls.mic && voiceSupported} disabled={!voiceSupported}>
+          <PiMicrophoneFill /><span><b>Voice</b><small>{voiceSupported ? 'Microphone' : 'Needs Chrome or Edge'}</small></span><i>{controls.mic && voiceSupported && <PiCheckBold />}</i>
+        </button>
+      </div>
+      <small className="intro-privacy">Mouse always works too. Video and audio stay on your computer and are never recorded.</small>
+    </div>
+  );
+}
+
 const list = (items: string[]) => items.join(', ').replace(/, ([^,]*)$/, ' and $1');
 
-export function StartScreen({ order, dailyNo, today, streak, countdown, loading, onDaily, onPractice }: Props) {
+export function StartScreen({ order, dailyNo, today, streak, countdown, loading, starting, controls, voiceSupported, onToggle, onDaily, onPractice }: Props) {
+  const wantsDevices = controls.camera || (controls.mic && voiceSupported);
+  const busy = loading || starting;
+  const label = (text: string) => loading ? 'Loading…' : starting ? 'Waiting for permission…' : text;
   const toppings = list(order.toppings.map(id => TOPPINGS.find(t => t.id === id)!.name));
   return (
     <div className="start-layer">
@@ -33,7 +58,8 @@ export function StartScreen({ order, dailyNo, today, streak, countdown, loading,
               <span className="intro-stars">{'★'.repeat(today.stars)}<i>{'★'.repeat(3 - today.stars)}</i> in {formatTime(today.seconds)}</span>
             </div>
             <p className="next-special">Next special in <b>{countdown}</b></p>
-            <button className="start-button" disabled={loading} onClick={onPractice}>{loading ? 'Loading…' : 'Practice a random order'}</button>
+            <Controls controls={controls} voiceSupported={voiceSupported} onToggle={onToggle} />
+            <button className="start-button" disabled={busy} onClick={onPractice}>{label('Practice a random order')}</button>
           </>
         ) : (
           <>
@@ -42,14 +68,9 @@ export function StartScreen({ order, dailyNo, today, streak, countdown, loading,
               <b>{order.customer} wants a {order.name}</b>
               <span>{toppings}</span>
             </div>
-            <ol className="intro-steps">
-              <li>Add all 7 ingredients to the bowl</li>
-              <li>Stir the batter smooth</li>
-              <li>Cook it golden, not burnt</li>
-              <li>Add the toppings and serve</li>
-            </ol>
-            <button className="start-button" disabled={loading} onClick={onDaily}>{loading ? 'Loading…' : 'Cook today’s special'}</button>
-            <button className="text-button" disabled={loading} onClick={onPractice}>or practice a random order</button>
+            <Controls controls={controls} voiceSupported={voiceSupported} onToggle={onToggle} />
+            <button className="start-button" disabled={busy} onClick={onDaily}>{label(wantsDevices ? 'Allow & cook today’s special' : 'Cook today’s special')}</button>
+            <button className="text-button" disabled={busy} onClick={onPractice}>or practice a random order</button>
             <small>Everyone gets the same special today. Your first serve counts.</small>
           </>
         )}

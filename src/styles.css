@@ -416,3 +416,33 @@
 .desktop-only-actions button:active{transform:translateY(4px);box-shadow:0 1px 0 #3b6824}
 .desktop-only-actions button.quiet{background:#fff3d9;color:#8a4a26;border-color:#e3a153;box-shadow:0 5px 0 #d49a57}
 .desktop-only-card small{display:block;min-height:18px;margin-top:10px;font-size:12px;font-weight:800;color:#56733e}
+
+/* ---------- Start screen: camera & mic ---------- */
+.intro-controls{margin:0 0 16px;text-align:left}
+.intro-controls-title{display:block;margin:0 0 6px 2px;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#c86b2f}
+.intro-toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.control-toggle{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:9px 10px;border:2px solid #ecd2a8;border-radius:14px;background:#fffaf0;color:#9b7556;text-align:left;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.control-toggle:hover:not(:disabled){transform:translateY(-1px);border-color:#e3a153}
+.control-toggle>svg{width:22px;height:22px}
+.control-toggle span{display:grid;line-height:1.15;min-width:0}
+.control-toggle b{font-size:13px;font-weight:900}
+.control-toggle small{margin:0!important;font-size:10px!important;color:inherit!important;opacity:.8}
+.control-toggle i{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:2px solid #e3c9a0;font-style:normal}
+.control-toggle i svg{width:13px;height:13px}
+.control-toggle.on{border-color:#8ab65e;background:#edf5e0;color:#4d7a31}
+.control-toggle.on i{border-color:#6ea447;background:#6ea447;color:#fff}
+.control-toggle:disabled{opacity:.55;cursor:not-allowed}
+.intro-privacy{display:block;margin:7px 2px 0!important;font-size:10px!important;line-height:1.35;color:#a57a5b!important}
+@media(max-height:760px){.intro-card .intro-order{margin-bottom:10px}.intro-card h1{margin-bottom:8px}}
+
+/* ---------- Mobile: today's special teaser ---------- */
+.desktop-only-card{padding:14px 18px 18px}
+.mobile-special{position:relative;margin:0 0 14px;border-radius:18px;overflow:hidden;border:3px solid #f0c98d;aspect-ratio:3/2}
+.mobile-special img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 65%}
+.mobile-special-tag{position:absolute;left:10px;top:10px;padding:4px 11px;border-radius:20px;background:rgba(124,61,32,.88);color:#fff4da;font-weight:900;font-size:12px}
+.desktop-only-card h1{font-size:27px;margin:2px 0 4px}
+.mobile-toppings{display:block;font-size:13px;font-weight:800;color:#a57a5b}
+.mobile-countdown{display:inline-block;margin:12px 0 12px;padding:6px 14px;border-radius:20px;background:#fdeccb;border:2px dashed #dc9a4d;font-size:13px;font-weight:800;color:#95633f}
+.mobile-countdown b{color:#7c3d20;font-variant-numeric:tabular-nums}
+.desktop-only-copy{font-size:13px;margin-bottom:14px}
+@media(max-height:680px){.mobile-special{aspect-ratio:2/1}.desktop-only-copy{display:none}}
