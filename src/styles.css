@@ -529,3 +529,12 @@
 
 /* Power cable continues from the top of the machine art up and off the screen */
 .maker-art::before{content:'';position:absolute;left:91.473%;bottom:calc(100% - 2px);width:2.946%;height:100vh;background:linear-gradient(90deg,rgba(20,20,20,0.24) 0%,rgba(26,26,26,1.00) 6%,rgba(22,22,22,1.00) 12%,rgba(24,24,24,1.00) 19%,rgba(32,32,33,1.00) 25%,rgba(44,44,45,1.00) 31%,rgba(69,69,70,1.00) 38%,rgba(100,98,101,1.00) 44%,rgba(92,90,92,1.00) 50%,rgba(63,62,64,1.00) 56%,rgba(42,42,42,1.00) 62%,rgba(32,31,31,1.00) 69%,rgba(25,25,25,1.00) 75%,rgba(20,20,20,1.00) 81%,rgba(20,20,19,1.00) 88%,rgba(30,29,29,1.00) 94%,rgba(35,35,35,0.12) 100%,rgba(35,35,35,0.12) 100%);filter:drop-shadow(0 18px 14px rgba(55,28,13,.38));pointer-events:none}
+
+/* ---------- Plated waffle photo (toppings stage) ---------- */
+.plate-stage{aspect-ratio:948/618}
+.plated-photo{filter:drop-shadow(0 18px 16px rgba(55,28,13,.35))}
+/* The box toppings are placed in matches the waffle inside the photo */
+.topping-phase .plate-waffle{left:16.9%;top:12.1%;width:65.2%;height:75.2%;transform:none}
+/* Sauces cover the waffle's top face, not its side */
+.topping-phase .drizzle{height:92%}
+.drizzle .drizzle-strand{stroke-dasharray:400;stroke-dashoffset:0;animation:drizzle-draw 1s ease-out both}

@@ -390,7 +390,7 @@ export default function App() {
   useEffect(() => {
     const load = (src: string) => new Promise<void>(resolve => { const image = new Image(); image.onload = image.onerror = () => resolve(); image.src = src; });
     const critical = [BACKGROUNDS.ingredients, BACKGROUNDS.mixing, ...BATTER_INGREDIENTS.map(i => i.asset), ...BOWL_STATES, ...MIXING_BOWL_STATES];
-    const later = [BACKGROUNDS.table, '/assets/waffle/plate.png', ...COOKING_ART, ...TOPPINGS.flatMap(t => t.asset ? [t.asset] : []), ...ORDERS.map(o => o.image)];
+    const later = [BACKGROUNDS.table, ...['raw', 'half', 'perfect', 'burnt'].map(d => `/assets/waffle/plated/plate-${d}.png`), ...COOKING_ART, ...TOPPINGS.flatMap(t => t.asset ? [t.asset] : []), ...ORDERS.map(o => o.image)];
     let alive = true;
     Promise.all(critical.map(load)).then(() => { if (alive) setLoading(false); later.forEach(load); });
     const fallback = window.setTimeout(() => setLoading(false), 4000);
