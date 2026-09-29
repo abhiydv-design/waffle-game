@@ -446,3 +446,85 @@
 .mobile-countdown b{color:#7c3d20;font-variant-numeric:tabular-nums}
 .desktop-only-copy{font-size:13px;margin-bottom:14px}
 @media(max-height:680px){.mobile-special{aspect-ratio:2/1}.desktop-only-copy{display:none}}
+
+/* ============================================================
+   Readability pass: bigger panels and text on every desktop size
+   ============================================================ */
+:root{--ui:1.12}
+@media(min-width:1200px) and (min-height:700px){:root{--ui:1.25}}
+@media(min-width:1560px) and (min-height:860px){:root{--ui:1.4}}
+@media(min-width:1880px) and (min-height:1000px){:root{--ui:1.55}}
+:root{--side:calc(var(--ui) * 262px + 20px)}
+
+/* Edge-anchored panels scale as a whole */
+.recipe-card,.camera-card,.gesture-guide,.voice-bubble,.reset-control,.sound-icon-control,.cook-card,.order-ticket{zoom:var(--ui)}
+
+/* Small text inside those panels */
+.recipe-title b{font-size:9px}
+.ingredient-row{font-size:13px}
+.camera-empty b{font-size:12px}
+.camera-empty span{font-size:10px}
+.camera-empty button{font-size:11px;padding:8px 13px}
+.camera-card>p{font-size:10px}
+.gesture-guide p{font-size:11px}
+.gesture-guide small{font-size:9px}
+.voice-bubble b{font-size:11px}
+.voice-bubble span{font-size:9px}
+.top-controls button{font-size:11px}
+.cook-body p{font-size:12px}
+.cook-actions button{font-size:13px}
+.order-ticket li{font-size:14px}
+
+/* The "Enable microphone" label was brown on brown */
+.voice-toggle,.voice-toggle span{color:#fff7df!important;font-size:11px;font-weight:900}
+.voice-toggle.active,.voice-toggle.active span{color:#fff!important}
+
+/* No camera: no gesture guide, voice panel moves up */
+.camera-off .gesture-guide{display:none}
+.camera-off .voice-bubble{top:296px}
+@media(max-width:820px){.camera-off .voice-bubble{top:229px}}
+
+/* Centred elements get larger type directly */
+.objective{font-size:15px;padding:10px 20px;gap:14px}
+.objective b{width:44px;height:28px;font-size:15px}
+.table-ingredient span{font-size:13px;padding:5px 12px;bottom:-10px}
+.selection-callout{width:290px;padding:12px 16px 14px}
+.selection-callout b{font-size:21px}
+.selection-callout span{font-size:13px;margin-bottom:9px}
+.selection-callout button{font-size:14px;padding:9px 18px;border-radius:12px}
+.mixing-stage .mix-card{width:380px;padding:12px 18px}
+.mix-card .mix-heading span{font-size:22px}
+.mix-card .mix-heading b{font-size:15px}
+.mix-card p{font-size:13px!important}
+.mix-card .mix-progress{height:10px}
+.game-toast{min-width:340px;max-width:min(620px,calc(100vw - 2 * var(--side)));padding:13px 20px;gap:12px;border-width:3px}
+.game-toast b{font-size:11px}
+.game-toast span{font-size:16px;line-height:1.3}
+
+/* Leave room for the larger side panels */
+.maker-art{height:min(88vh,calc((100vw - 2 * var(--side)) * 1.371))}
+.plate-stage{width:min(calc(100vw - 2 * var(--side) - 40px),96vh)}
+.topping-tray{width:min(920px,calc(100vw - 2 * var(--side) - 20px))}
+.tray-art{height:74px}
+.tray-name{font-size:13px}
+
+/* Start and result screens */
+.intro-card{width:min(520px,94vw)}
+.intro-card>.intro-top p{font-size:12px}
+.intro-order b{font-size:21px}
+.intro-order span{font-size:14px}
+.control-toggle b{font-size:15px}
+.control-toggle small{font-size:11px!important}
+.intro-privacy{font-size:11px!important}
+.intro-card small{font-size:12px}
+.text-button{font-size:14px}
+.result-notes{font-size:14px}
+.result-meta{font-size:13px}
+.result-meta b{font-size:15px}
+.share-status{font-size:13px}
+/* Left-side ingredients open their popup to the right, clear of the ingredient list */
+.callout-sugar{left:24.5%;top:55%;transform:translate(0,-50%)}
+.callout-egg{left:29%;top:68%;transform:translate(0,-50%)}
+.callout-sugar,.callout-egg{animation:callout-in-right .18s ease-out}
+@keyframes callout-in-right{from{opacity:0;transform:translate(-10px,-50%)}}
+.tray-name{white-space:normal;line-height:1.1;text-align:center;min-height:2.2em;display:flex;align-items:center;justify-content:center;overflow:visible}

@@ -77,6 +77,7 @@ export default function App() {
   const feedbackTimer = useRef<number>();
   const timers = useRef<number[]>([]);
   const selectedRef = useRef(selected); selectedRef.current = selected;
+  const cameraOnRef = useRef(false);
   const addedRef = useRef(added); addedRef.current = added;
   const mixRef = useRef(mixProgress); mixRef.current = mixProgress;
   const phaseRef = useRef(phase); phaseRef.current = phase;
@@ -106,7 +107,7 @@ export default function App() {
     if (!item || addedRef.current.has(id)) { play('duplicate'); showFeedback(`${item?.name || 'Ingredient'} is already in the bowl`, 'warning'); return; }
     setSelected(id);
     play('pickup');
-    showFeedback(`${item.name} picked. ${item.instruction}`, 'info');
+    showFeedback(cameraOnRef.current ? `${item.name} picked. ${item.instruction}, or click the bowl` : `${item.name} picked. Now click the bowl`, 'info');
   }, [play, showFeedback]);
 
   const addSelected = useCallback((source: 'mouse' | 'voice' | 'gesture', action?: HandAction) => {
@@ -306,6 +307,8 @@ export default function App() {
   }, [addSelected, choose, closeLid, openLid, pour, serveOrder, showFeedback, stir]);
 
   const tracking = useHandTracking(videoRef, handAction);
+  const cameraOn = tracking.status === 'tracking' || tracking.status === 'lost' || tracking.status === 'loading';
+  cameraOnRef.current = tracking.status === 'tracking' || tracking.status === 'lost';
 
   // ---------- Loading & lifecycle ----------
   useEffect(() => {
@@ -433,7 +436,7 @@ export default function App() {
   const playing = stage !== 'served';
 
   return (
-    <main className={`game-shell batter-only ${stage === 'mixing' ? 'mixing-phase' : ''} ${stage === 'cooking' ? 'maker-phase' : ''} ${stage === 'toppings' ? 'topping-phase' : ''} ${stage === 'served' ? 'served-phase' : ''}`}>
+    <main className={`game-shell batter-only ${cameraOn ? '' : 'camera-off'} ${stage === 'mixing' ? 'mixing-phase' : ''} ${stage === 'cooking' ? 'maker-phase' : ''} ${stage === 'toppings' ? 'topping-phase' : ''} ${stage === 'served' ? 'served-phase' : ''}`}>
       <img key={background} className="kitchen-background scene-background" src={background} alt="" />
       <div className="game-vignette" />
       <TopBar sound={soundEnabled} onSound={() => { trackEvent('sound_toggled', { on: !soundEnabled }); toggleSound(); }} onReset={backToMenu} />
@@ -448,6 +451,7 @@ export default function App() {
           onChoose={choose}
           onAddSelected={() => addSelected('mouse')}
           onStir={stir}
+          gestures={cameraOnRef.current}
           onDropIngredient={id => { selectedRef.current = id; setSelected(id); window.setTimeout(() => addSelected('mouse'), 0); }}
         />
       )}

@@ -50,9 +50,9 @@ export function CookingStage({ step, heat, onPour, onClose, onOpen, onServe, onR
     DONENESS_LABEL[doneness];
 
   const tip =
-    step === 'open' ? 'Tilt your hand, say “pour”, or tap the machine.' :
-    step === 'poured' ? 'Make a fist, say “close”, or tap the machine.' :
-    step === 'cooking' ? 'Open your palm or say “open” when the needle reaches gold.' :
+    step === 'open' ? 'Click the machine to pour. You can also tilt your hand or say “pour”.' :
+    step === 'poured' ? 'Click the machine to close the lid. Or make a fist, or say “close”.' :
+    step === 'cooking' ? 'Click the machine when the needle reaches gold. Or open your palm, or say “open”.' :
     step === 'opened' && doneness === 'perfect' ? 'Serve it to start adding toppings.' :
     step === 'opened' && doneness === 'burnt' ? 'Make a fresh batch, or serve it anyway.' :
     step === 'opened' ? 'Close the lid to cook it a little longer.' :

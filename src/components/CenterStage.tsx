@@ -9,9 +9,10 @@ type Props = {
   onDropIngredient: (id: string) => void;
   onAddSelected: () => void;
   onStir: () => void;
+  gestures: boolean;
 };
 
-export function CenterStage({ added, selected, mixProgress, onChoose, onDropIngredient, onAddSelected, onStir }: Props) {
+export function CenterStage({ added, selected, mixProgress, onChoose, onDropIngredient, onAddSelected, onStir, gestures }: Props) {
   const firstMissing = BATTER_INGREDIENTS.findIndex(item => !added.has(item.id));
   const bowlStep = firstMissing === -1 ? BATTER_TOTAL : firstMissing;
   const mixing = added.size === BATTER_TOTAL;
@@ -73,7 +74,7 @@ export function CenterStage({ added, selected, mixProgress, onChoose, onDropIngr
           {picked && (
             <div key={picked.id} className={`selection-callout callout-${picked.id}`}>
               <b>{picked.name}</b>
-              <span>{picked.instruction}, or tap the bowl</span>
+              <span>{gestures ? `${picked.instruction}, or click the bowl` : 'Click the bowl to add it'}</span>
               <button data-hand-press onClick={onAddSelected}>Add to bowl</button>
             </div>
           )}
@@ -109,7 +110,7 @@ export function CenterStage({ added, selected, mixProgress, onChoose, onDropIngr
       {mixing && (
         <div className={`mix-card ${ready ? 'complete' : ''}`}>
           <div className="mix-heading"><span>{ready ? 'Batter Ready!' : 'Mix the Batter'}</span><b>{mixProgress}%</b></div>
-          <p>{ready ? 'Smooth batter. Off to the waffle maker…' : 'Circle your index finger, or drag circles inside the bowl'}</p>
+          <p>{ready ? 'Smooth batter. Off to the waffle maker…' : gestures ? 'Circle your finger in the air, or drag circles in the bowl' : 'Hold the mouse and drag circles inside the bowl'}</p>
           <div className="mix-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={mixProgress}><i style={{ width: `${mixProgress}%` }} /></div>
         </div>
       )}
