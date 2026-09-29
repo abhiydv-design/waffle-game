@@ -456,3 +456,73 @@
 @media(max-width:820px){.camera-off .voice-bubble{top:229px}}
 /* Topping names wrap instead of being cut off */
 .tray-name{white-space:normal;line-height:1.1;text-align:center;min-height:2.2em;display:flex;align-items:center;justify-content:center;overflow:visible}
+
+/* ============================================================
+   Batch 2: customer, tutorial coach, combo popups
+   ============================================================ */
+
+/* ---------- Customer at the counter ---------- */
+.customer-corner{position:absolute;z-index:26;left:18px;bottom:16px;display:flex;flex-direction:column;align-items:center;pointer-events:none;animation:customer-in .5s cubic-bezier(.3,1.4,.5,1)}
+@keyframes customer-in{from{transform:translateY(40px);opacity:0}}
+.customer-portrait{width:96px;height:96px;border-radius:50%;padding:4px;background:#fff8e7;border:3px solid #e7a95a;box-shadow:0 6px 0 rgba(102,53,24,.3),0 14px 26px rgba(69,30,13,.25)}
+.customer-portrait .customer-face{display:block;width:100%;height:100%}
+.customer-name{margin-top:-10px;padding:2px 10px;border-radius:20px;background:#8f4724;color:#fff4da;font-size:11px;font-weight:900;border:2px solid #f0c98d}
+.customer-bubble{position:absolute;left:4px;bottom:118px;width:max-content;max-width:230px;padding:9px 13px;background:#fff;border:2px solid #e3a153;border-radius:16px 16px 16px 4px;color:#6d4028;font-size:13px;font-weight:800;line-height:1.3;box-shadow:0 5px 0 rgba(92,47,22,.2);animation:bubble-in .3s cubic-bezier(.3,1.5,.5,1),bubble-out .3s 2.7s ease-in forwards}
+.customer-bubble::after{content:'';position:absolute;left:24px;bottom:-9px;width:14px;height:14px;background:#fff;border-right:2px solid #e3a153;border-bottom:2px solid #e3a153;transform:rotate(45deg)}
+@keyframes bubble-in{from{transform:scale(.6) translateY(10px);opacity:0}}
+@keyframes bubble-out{to{transform:translateY(-6px);opacity:0}}
+.customer-face .customer-eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.customer-corner.mood-impatient .customer-portrait{animation:tap-foot .5s ease-in-out infinite alternate}
+.customer-corner.mood-delighted .customer-portrait,.customer-corner.mood-excited .customer-portrait{animation:hop .45s ease-out 2}
+.customer-corner.mood-worried .customer-portrait,.customer-corner.mood-confused .customer-portrait{animation:wobble .5s ease-in-out 2}
+@keyframes tap-foot{to{transform:translateY(-3px)}}
+@keyframes hop{50%{transform:translateY(-10px)}}
+@keyframes wobble{25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+.customer-corner.mood-impatient .customer-portrait{border-color:#df7b4e}
+.customer-corner.mood-delighted .customer-portrait{border-color:#8ab65e}
+
+/* ---------- Tutorial coach ---------- */
+.coach-layer{position:fixed;inset:0;z-index:60;pointer-events:none}
+.coach-ring{position:fixed;border-radius:18px;border:4px solid #ffcf4a;box-shadow:0 0 0 6px rgba(255,207,74,.35),0 0 30px rgba(255,190,60,.6);animation:coach-pulse 1.2s ease-in-out infinite;transition:left .25s,top .25s,width .25s,height .25s}
+@keyframes coach-pulse{50%{box-shadow:0 0 0 12px rgba(255,207,74,.12),0 0 40px rgba(255,190,60,.8)}}
+.coach-bubble{position:fixed;padding:12px 15px 12px;background:#3a1f12;color:#fff4da;border:3px solid #ffcf4a;border-radius:16px;box-shadow:0 10px 26px rgba(30,10,2,.45);pointer-events:auto;animation:coach-in .3s cubic-bezier(.3,1.4,.5,1)}
+@keyframes coach-in{from{opacity:0;transform:scale(.9)}}
+.coach-bubble p{margin:3px 0 9px;font-size:15px;font-weight:800;line-height:1.35}
+.coach-count{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#ffcf4a}
+.coach-bubble button{padding:0;border:0;background:none;color:#f3cf94;font-size:11px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.coach-bubble button:hover{color:#fff}
+.coach-arrow{position:absolute;width:16px;height:16px;background:#3a1f12;border:3px solid #ffcf4a;transform:rotate(45deg)}
+.place-bottom .coach-arrow{top:-10px;margin-left:-8px;border-right:0;border-bottom:0}
+.place-top .coach-arrow{bottom:-10px;margin-left:-8px;border-left:0;border-top:0}
+.place-right .coach-arrow{left:-10px;margin-top:-8px;border-right:0;border-top:0}
+.place-left .coach-arrow{right:-10px;margin-top:-8px;border-left:0;border-bottom:0}
+
+/* ---------- Combo popups ---------- */
+.burst-layer{position:fixed;inset:0;z-index:55;pointer-events:none;display:grid;place-items:center}
+.burst{grid-area:1/1;position:relative;margin-top:-22vh;animation:burst-pop 1.4s cubic-bezier(.2,1.4,.4,1) forwards}
+.burst span{display:block;font:800 clamp(38px,5vw,64px)/1 'Baloo 2',system-ui,sans-serif;color:#fff;letter-spacing:.01em;-webkit-text-stroke:3px #7c3d20;paint-order:stroke fill;text-shadow:0 6px 0 #7c3d20,0 14px 24px rgba(40,15,5,.4);white-space:nowrap}
+.burst.tone-gold span{color:#ffd24a}
+.burst.tone-green span{color:#9be26b}
+.burst.tone-pink span{color:#ff9fc3}
+.burst i{position:absolute;left:50%;top:50%;width:12px;height:12px;border-radius:3px;background:#ffd24a;animation:confetti 1s ease-out forwards}
+.burst.tone-green i{background:#9be26b}
+.burst.tone-pink i{background:#ff9fc3}
+.burst i:nth-child(2){--x:-150px;--y:-70px}.burst i:nth-child(3){--x:150px;--y:-80px}.burst i:nth-child(4){--x:-120px;--y:60px}
+.burst i:nth-child(5){--x:130px;--y:70px}.burst i:nth-child(6){--x:-30px;--y:-110px}.burst i:nth-child(7){--x:40px;--y:100px}
+@keyframes confetti{from{transform:translate(-50%,-50%) scale(.3)}to{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(220deg) scale(1);opacity:0}}
+@keyframes burst-pop{0%{transform:scale(.3) rotate(-8deg);opacity:0}18%{transform:scale(1.12) rotate(2deg);opacity:1}30%{transform:scale(1) rotate(0)}80%{opacity:1;transform:translateY(-8px)}100%{opacity:0;transform:translateY(-30px) scale(.96)}}
+
+/* ---------- Result popup additions ---------- */
+.result-customer{display:flex;align-items:center;gap:10px;margin:2px auto 8px;max-width:340px;text-align:left}
+.result-customer .customer-face{flex:none;border-radius:50%;border:3px solid #f0c98d}
+.result-customer blockquote{margin:0;font-size:14px;font-weight:800;color:#6d4028;line-height:1.3}
+.result-customer blockquote b{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#c86b2f}
+.completion-card img{height:min(22vh,170px)}
+.camera-invite{position:relative;display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 34px 10px 12px;text-align:left;background:#edf5e0;border:2px solid #a9c77f;border-radius:14px}
+.camera-invite-icon{font-size:26px}
+.camera-invite div{display:grid;gap:2px;flex:1}
+.camera-invite b{font-size:13px;color:#4d7a31}
+.camera-invite div span{font-size:11px;color:#6b7f58;font-weight:700}
+.completion-card .camera-invite button:not(.invite-close){flex:none;padding:7px 14px;font-size:14px;border-width:2px;box-shadow:0 3px 0 #3b6824;background:#5e9d3b}
+.completion-card .camera-invite .invite-close{position:absolute;right:6px;top:4px;padding:2px 6px;border:0;background:none;box-shadow:none;color:#6b7f58;font-size:18px;line-height:1}
